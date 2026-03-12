@@ -1,0 +1,29 @@
+version: '3.9'
+services:
+  api:
+    build: ./apps/api
+    ports:
+      - "4000:4000"
+    environment:
+      DATABASE_URL: "file:./dev.db"
+      JWT_SECRET: "${JWT_SECRET}"
+      OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
+      STRIPE_WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
+      STRIPE_PRO_PRICE_ID: "${STRIPE_PRO_PRICE_ID}"
+      CLIENT_URL: "http://localhost"
+      PORT: "4000"
+    volumes:
+      - api_uploads:/app/uploads
+      - api_db:/app/prisma
+
+  web:
+    build: ./apps/web
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+volumes:
+  api_uploads:
+  api_db:

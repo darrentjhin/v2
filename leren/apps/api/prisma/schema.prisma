@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String
+  plan              String    @default("FREE")
+  subscriptionStatus String?
+  currentPeriodEnd  DateTime?
+  createdAt         DateTime  @default(now())
+
+  profile           Profile?
+  settings          Settings?
+  sessions          TutorSession[]
+  saved             SavedExplanation[]
+  practiceSets      PracticeSet[]
+  attempts          Attempt[]
+  enrollments       Enrollment[]
+  classrooms        Classroom[]
+  assignments       Assignment[]
+  subjects          Subject[]
+}
+
+model Profile {
+  id             String  @id @default(cuid())
+  userId         String  @unique
+  fullName       String?
+  school         String?
+  major          String?
+  gradeLevel     String?
+  nativeLanguage String?
+  targetLanguage String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Settings {
+  id                   String  @id @default(cuid())
+  userId               String  @unique
+  uiLanguage           String  @default("en")
+  tutorLanguage        String  @default("en")
+  bilingualMode        Boolean @default(false)
+  voice                String  @default("alloy")
+  voiceSpeed           Float   @default(1.0)
+  autoReplySeconds     Int     @default(2)
+  storeHistory         Boolean @default(true)
+  notificationsEnabled Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TutorSession {
+  id         String    @id @default(cuid())
+  userId     String
+  subjectId  String?
+  title      String?
+  startedAt  DateTime  @default(now())
+  endedAt    DateTime?
+
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject Subject?    @relation(fields: [subjectId], references: [id], onDelete: SetNull)
+  turns   TutorTurn[]
+}
+
+model TutorTurn {
+  id            String   @id @default(cuid())
+  sessionId     String
+  role          String   // "USER" | "TUTOR"
+  text          String   @default("")
+  audioUrl      String?
+  screenshotUrl String?
+  createdAt     DateTime @default(now())
+
+  session TutorSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model SavedExplanation {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  content   String
+  tags      String   @default("[]") // JSON array
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PracticeSet {
+  id         String   @id @default(cuid())
+  userId     String
+  subject    String
+  difficulty String
+  createdAt  DateTime @default(now())
+
+  user     User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problems PracticeProblem[]
+  classAssignments ClassAssignment[]
+}
+
+model PracticeProblem {
+  id        String   @id @default(cuid())
+  setId     String
+  prompt    String
+  solution  String
+  createdAt DateTime @default(now())
+
+  set      PracticeSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+  attempts Attempt[]
+}
+
+model Attempt {
+  id        String   @id @default(cuid())
+  problemId String
+  userId    String
+  answer    String
+  isCorrect Boolean
+  feedback  String?
+  createdAt DateTime @default(now())
+
+  problem PracticeProblem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Assignment {
+  id        String   @id @default(cuid())
+  userId    String
+  fileUrl   String
+  fileName  String
+  status    String   @default("PENDING") // PENDING | ANALYZED
+  summary   String?
+  questions String?  // JSON array
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subject {
+  id        String        @id @default(cuid())
+  userId    String
+  name      String
+  summary   String?       // AI-generated summary of uploaded materials
+  status    String        @default("active") // "active" | "archived" | "trashed"
+  trashedAt DateTime?
+  createdAt DateTime      @default(now())
+
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  files    SubjectFile[]
+  sessions TutorSession[]
+}
+
+model SubjectFile {
+  id            String    @id @default(cuid())
+  subjectId     String
+  fileName      String
+  fileUrl       String
+  fileType      String    // "image" | "pdf" | "text"
+  extractedText String?   // text content extracted at upload time for AI context
+  status        String    @default("active") // "active" | "trashed"
+  trashedAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+}
+
+model Classroom {
+  id            String   @id @default(cuid())
+  name          String
+  teacherUserId String
+  createdAt     DateTime @default(now())
+
+  teacher         User              @relation(fields: [teacherUserId], references: [id], onDelete: Cascade)
+  enrollments     Enrollment[]
+  classAssignments ClassAssignment[]
+}
+
+model Enrollment {
+  id          String   @id @default(cuid())
+  classroomId String
+  studentUserId String
+  createdAt   DateTime @default(now())
+
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  student   User      @relation(fields: [studentUserId], references: [id], onDelete: Cascade)
+
+  @@unique([classroomId, studentUserId])
+}
+
+model ClassAssignment {
+  id           String    @id @default(cuid())
+  classroomId  String
+  practiceSetId String
+  dueDate      DateTime?
+  createdAt    DateTime  @default(now())
+
+  classroom   Classroom   @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  practiceSet PracticeSet @relation(fields: [practiceSetId], references: [id], onDelete: Cascade)
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  wordCount Int
+  createdAt DateTime @default(now())
+}

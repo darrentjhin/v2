@@ -1,0 +1,14 @@
+{
+  "name": "leren",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter web dev\" \"pnpm --filter api dev\" --names web,api --prefix-colors cyan,yellow",
+    "build": "pnpm --filter web build && pnpm --filter api build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

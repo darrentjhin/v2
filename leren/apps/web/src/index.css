@@ -1,0 +1,259 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; }
+}
+
+@layer components {
+  .btn { @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900; }
+  .btn-primary { @apply btn bg-blue-600 hover:bg-blue-500 text-white focus:ring-blue-500; }
+  .btn-secondary { @apply btn bg-slate-700 hover:bg-slate-600 text-slate-100 focus:ring-slate-500; }
+  .btn-danger { @apply btn bg-red-900/60 hover:bg-red-800 text-red-300 border border-red-800 focus:ring-red-500; }
+  .card { @apply bg-slate-900/80 backdrop-blur-sm border border-slate-700/70 rounded-xl p-5; }
+  .input { @apply w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent; }
+  .label { @apply block text-sm font-medium text-slate-300 mb-1; }
+  .badge { @apply inline-block text-xs px-2 py-0.5 rounded-full font-medium; }
+}
+
+/* ── Glow CTA button ─────────────────────────────────────────────────────── */
+/* ── Comet button ────────────────────────────────────────────────────────── */
+.btn-glow {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2.25rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  background: #050f24;
+  box-shadow: 0 0 18px rgba(59,130,246,0.25), 0 4px 20px rgba(0,0,0,0.5);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-decoration: none;
+  isolation: isolate;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Spinning comet arc — the conic shape stays fixed, the element rotates */
+.btn-glow::before {
+  content: "";
+  position: absolute;
+  /* Make it a square large enough to cover the pill at any rotation angle */
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent    0deg,
+    transparent  240deg,
+    rgba(59,130,246,0.12) 275deg,
+    rgba(59,130,246,0.45) 310deg,
+    rgba(96,165,250,0.88) 342deg,
+    rgba(186,224,255,1)   352deg,
+    rgba(255,255,255,1)   357deg,
+    transparent           360deg
+  );
+  animation: comet-rotate 2s linear infinite;
+  z-index: -2;
+}
+
+/* Inner fill — covers centre, leaving only the thin outer border visible */
+.btn-glow::after {
+  content: "";
+  position: absolute;
+  inset: 1.5px;
+  border-radius: 9999px;
+  background: #050f24;
+  z-index: -1;
+}
+
+/* Soft glow bloom that follows the comet head */
+.btn-glow .comet-blur {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent    0deg,
+    transparent  270deg,
+    rgba(59,130,246,0.08) 300deg,
+    rgba(59,130,246,0.35) 330deg,
+    rgba(147,197,253,0.8) 352deg,
+    transparent           360deg
+  );
+  animation: comet-rotate 2s linear infinite;
+  filter: blur(9px);
+  z-index: -3;
+}
+
+.btn-glow:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 0 32px rgba(59,130,246,0.5), 0 8px 28px rgba(0,0,0,0.5);
+}
+.btn-glow:active { transform: translateY(0) scale(0.98); }
+
+/* Blue sweep across text */
+.blue-sweep-text {
+  background-image: linear-gradient(
+    90deg,
+    #ffffff   0%,
+    #ffffff  30%,
+    #60a5fa  45%,
+    #3b82f6  50%,
+    #93c5fd  55%,
+    #ffffff  70%,
+    #ffffff 100%
+  );
+  background-size: 250% 100%;
+  background-position: 150% center;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: blue-sweep 5s ease-in-out infinite;
+}
+
+@keyframes blue-sweep {
+  0%   { background-position: 150% center; }
+  50%  { background-position:  50% center; }
+  100% { background-position: -50% center; }
+}
+
+@keyframes comet-rotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Feature card — soft pulsing border glow (one per theme colour) ──── */
+@keyframes feat-border-pulse-0 {
+  0%,100% { box-shadow: 0 0  8px rgba(96,165,250,0.12), inset 0 0 0 1px rgba(96,165,250,0.15); }
+  50%     { box-shadow: 0 0 22px rgba(96,165,250,0.30), inset 0 0 0 1px rgba(96,165,250,0.35); }
+}
+@keyframes feat-border-pulse-1 {
+  0%,100% { box-shadow: 0 0  8px rgba(59,130,246,0.12), inset 0 0 0 1px rgba(59,130,246,0.15); }
+  50%     { box-shadow: 0 0 22px rgba(59,130,246,0.30), inset 0 0 0 1px rgba(59,130,246,0.35); }
+}
+@keyframes feat-border-pulse-2 {
+  0%,100% { box-shadow: 0 0  8px rgba(147,197,253,0.10), inset 0 0 0 1px rgba(147,197,253,0.13); }
+  50%     { box-shadow: 0 0 20px rgba(147,197,253,0.26), inset 0 0 0 1px rgba(147,197,253,0.30); }
+}
+@keyframes feat-border-pulse-3 {
+  0%,100% { box-shadow: 0 0  8px rgba(29,78,216,0.15), inset 0 0 0 1px rgba(29,78,216,0.18); }
+  50%     { box-shadow: 0 0 22px rgba(29,78,216,0.35), inset 0 0 0 1px rgba(29,78,216,0.40); }
+}
+@keyframes feat-border-pulse-4 {
+  0%,100% { box-shadow: 0 0  8px rgba(56,189,248,0.12), inset 0 0 0 1px rgba(56,189,248,0.15); }
+  50%     { box-shadow: 0 0 22px rgba(56,189,248,0.30), inset 0 0 0 1px rgba(56,189,248,0.35); }
+}
+@keyframes feat-border-pulse-5 {
+  0%,100% { box-shadow: 0 0  8px rgba(30,64,175,0.15), inset 0 0 0 1px rgba(30,64,175,0.18); }
+  50%     { box-shadow: 0 0 22px rgba(30,64,175,0.38), inset 0 0 0 1px rgba(30,64,175,0.42); }
+}
+
+/* ── Floating particles ──────────────────────────────────────────────────── */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  animation: float-up var(--dur, 6s) ease-in-out var(--delay, 0s) infinite;
+}
+@keyframes float-up {
+  0%   { opacity: 0; transform: translateY(0) scale(0.6); }
+  20%  { opacity: 0.6; }
+  80%  { opacity: 0.3; }
+  100% { opacity: 0; transform: translateY(-180px) scale(1.2); }
+}
+
+/* ── Hero gradient orbs ──────────────────────────────────────────────────── */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  animation: orb-drift var(--dur, 10s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+@keyframes orb-drift {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(30px, -20px) scale(1.08); }
+}
+
+/* ── Fade-in-up entrance ─────────────────────────────────────────────────── */
+.fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: fade-in-up 0.65s ease forwards;
+}
+@keyframes fade-in-up {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Card hover lift ─────────────────────────────────────────────────────── */
+.card-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.3), 0 0 20px rgba(99,102,241,0.12);
+  border-color: rgba(99,102,241,0.35) !important;
+}
+
+/* ── Gradient text ───────────────────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Shimmer badge ───────────────────────────────────────────────────────── */
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 50%, transparent 100%);
+  transform: translateX(-100%);
+  animation: shimmer-slide 2.5s ease-in-out infinite;
+}
+@keyframes shimmer-slide {
+  0%   { transform: translateX(-100%); }
+  60%, 100% { transform: translateX(200%); }
+}
+
+/* ── Feature icon pulse ──────────────────────────────────────────────────── */
+.icon-glow {
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+.card-lift:hover .icon-glow {
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.7));
+  transform: scale(1.15);
+}
+
+/* ── Leren logo ──────────────────────────────────────────────────────────── */
+.leren-logo {
+  height: 126px;
+  width: auto;
+  object-fit: contain;
+}
+.leren-logo-lg {
+  height: 182px;
+  width: auto;
+  object-fit: contain;
+}
