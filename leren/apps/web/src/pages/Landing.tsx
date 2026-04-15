@@ -703,21 +703,25 @@ function PricingSection({ t, ctaTo }: { t: ReturnType<typeof getT>; ctaTo: strin
 }
 
 /* ── Contact us section ─────────────────────────────────────────────────────── */
+// Uses Formspree (https://formspree.io) — free, no backend needed.
+// To activate: sign up at formspree.io, create a form pointed at lerenai.cs@gmail.com,
+// then replace FORMSPREE_FORM_ID below with your form's ID (e.g. "xpwzgkla").
+const FORMSPREE_FORM_ID = 'mnjgvoov';
+
 function ContactSection() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [wordCount, setWordCount] = useState(0);
   const [submitting, setSubmitting] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
+  const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null);
 
   const MAX_WORDS = 250;
 
   const handleMessageChange = (value: string) => {
     const parts = value.trim().split(/\s+/).filter(Boolean);
     if (parts.length > MAX_WORDS) {
-      const clipped = parts.slice(0, MAX_WORDS).join(' ');
-      setMessage(clipped);
+      setMessage(parts.slice(0, MAX_WORDS).join(' '));
       setWordCount(MAX_WORDS);
     } else {
       setMessage(value);
@@ -729,24 +733,24 @@ function ContactSection() {
     e.preventDefault();
     setStatus(null);
     const words = message.trim().split(/\s+/).filter(Boolean).length;
-    if (words === 0) {
-      setStatus('Please enter a message.');
-      return;
-    }
-    if (words > MAX_WORDS) {
-      setStatus('Message must be 250 words or fewer.');
-      return;
-    }
+    if (words === 0) { setStatus({ ok: false, text: 'Please enter a message.' }); return; }
+    if (words > MAX_WORDS) { setStatus({ ok: false, text: 'Message must be 250 words or fewer.' }); return; }
     setSubmitting(true);
     try {
-      await api.post('/contact', { name, email, message });
-      setStatus('Thanks for reaching out! We\'ll get back to you soon.');
-      setName('');
-      setEmail('');
-      setMessage('');
-      setWordCount(0);
-    } catch (err: any) {
-      setStatus(err?.message ?? 'Something went wrong. Please try again.');
+      const res = await fetch(`https://formspree.io/f/${FORMSPREE_FORM_ID}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ name, email, message }),
+      });
+      if (res.ok) {
+        setStatus({ ok: true, text: "Thanks! We've received your message and will reply soon." });
+        setName(''); setEmail(''); setMessage(''); setWordCount(0);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setStatus({ ok: false, text: data?.errors?.[0]?.message ?? 'Something went wrong. Please try again.' });
+      }
+    } catch {
+      setStatus({ ok: false, text: 'Network error. Please try again.' });
     } finally {
       setSubmitting(false);
     }
@@ -811,8 +815,8 @@ function ContactSection() {
             />
           </div>
           {status && (
-            <p className="text-xs text-slate-400">
-              {status}
+            <p className={`text-xs ${status.ok ? 'text-green-400' : 'text-red-400'}`}>
+              {status.text}
             </p>
           )}
           <div className="flex justify-end">

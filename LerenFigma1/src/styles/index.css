@@ -1,0 +1,15 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: rgba(99, 102, 241, 0.15);
+  color: #312e81;
+}
